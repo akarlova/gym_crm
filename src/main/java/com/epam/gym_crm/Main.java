@@ -1,6 +1,8 @@
 package com.epam.gym_crm;
 
 import com.epam.gym_crm.config.AppConfig;
+import com.epam.gym_crm.dao.TraineeDao;
+import com.epam.gym_crm.domain.Trainee;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;

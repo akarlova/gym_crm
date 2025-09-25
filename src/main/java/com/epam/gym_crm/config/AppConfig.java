@@ -9,8 +9,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Configuration
 @ComponentScan(basePackages = "com.epam.gym_crm")
@@ -18,17 +17,17 @@ import java.util.Map;
 public class AppConfig {
 
     @Bean(name = "traineeStorage")
-    public Map<Long, Trainee> traineeStorage() {
-        return new HashMap<>();
+    public ConcurrentHashMap<Long, Trainee> traineeStorage() {
+        return new ConcurrentHashMap<>();
     }
 
     @Bean(name = "trainerStorage")
-    public Map<Long, Trainer> trainerStorage() {
-        return new HashMap<>();
+    public ConcurrentHashMap<Long, Trainer> trainerStorage() {
+        return new ConcurrentHashMap<>();
     }
 
     @Bean(name = "trainingStorage")
-    public Map<Long, Training> trainingStorage() {
-        return new HashMap<>();
+    public ConcurrentHashMap<Long, Training> trainingStorage() {
+        return new ConcurrentHashMap<>();
     }
 }
