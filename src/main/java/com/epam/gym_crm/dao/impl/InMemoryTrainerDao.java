@@ -3,11 +3,13 @@ package com.epam.gym_crm.dao.impl;
 import com.epam.gym_crm.dao.TrainerDao;
 import com.epam.gym_crm.domain.Trainer;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Repository;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+@Repository
 public class InMemoryTrainerDao implements TrainerDao {
 
     private final ConcurrentHashMap<Long, Trainer> storage;
