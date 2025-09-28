@@ -65,7 +65,7 @@ public class TraineeServiceImpl implements TraineeService {
         int count = 0;
         while (usernameExists(finalUsername)) {
             count++;
-            finalUsername = SimpleUsernameGenerator.addSuffix(finalUsername, count);
+            finalUsername = SimpleUsernameGenerator.addSuffix(baseUsername, count);
         }
         return finalUsername;
     }

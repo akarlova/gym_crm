@@ -65,7 +65,7 @@ public class TrainerServiceImpl implements TrainerService {
         int count = 0;
         while (usernameExists(finalUsername)) {
             count++;
-            finalUsername = SimpleUsernameGenerator.addSuffix(finalUsername, count);
+            finalUsername = SimpleUsernameGenerator.addSuffix(baseUsername, count);
         }
         return finalUsername;
     }
