@@ -1,5 +1,5 @@
 package com.epam.gym_crm.util;
 
-public interface PasswordGenerator {
+public interface IPasswordGenerator {
     String generate();
 }

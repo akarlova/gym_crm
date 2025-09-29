@@ -9,15 +9,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.Map;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringJUnitConfig(AppConfig.class)
 public class TrainerServiceTest {
-    private final TrainerService trainerService;
+    private final ITrainerService trainerService;
     private final Map<Long, Trainer> storage;
 
     @Autowired
-    public TrainerServiceTest(TrainerService trainerService,
+    public TrainerServiceTest(ITrainerService trainerService,
                               @Qualifier("trainerStorage") Map<Long, Trainer> storage) {
         this.trainerService = trainerService;
         this.storage = storage;

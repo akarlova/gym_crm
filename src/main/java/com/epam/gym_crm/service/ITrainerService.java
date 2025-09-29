@@ -5,7 +5,7 @@ import com.epam.gym_crm.domain.Trainer;
 import java.util.List;
 import java.util.Optional;
 
-public interface TrainerService {
+public interface ITrainerService {
     Trainer create(Trainer trainer);
 
     Trainer update(Trainer trainer);

@@ -5,7 +5,7 @@ import com.epam.gym_crm.domain.Trainee;
 import java.util.List;
 import java.util.Optional;
 
-public interface TraineeService {
+public interface ITraineeService {
     Trainee create(Trainee trainee);
 
     Trainee update(Trainee trainee);

@@ -8,7 +8,7 @@ public abstract class User {
     private String lastName;
     private String username;
     private String password;
-    private boolean isActive = true;
+    private boolean active = true;
 
     public Long getId() {
         return id;
@@ -51,11 +51,11 @@ public abstract class User {
     }
 
     public boolean isActive() {
-        return isActive;
+        return active;
     }
 
     public void setActive(boolean active) {
-        isActive = active;
+        this.active = active;
     }
 
     @Override

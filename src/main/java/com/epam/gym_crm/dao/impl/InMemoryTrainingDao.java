@@ -1,25 +1,34 @@
 package com.epam.gym_crm.dao.impl;
 
-import com.epam.gym_crm.dao.TrainingDao;
+import com.epam.gym_crm.dao.ITrainingDao;
 import com.epam.gym_crm.domain.Training;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
-public class InMemoryTrainingDao implements TrainingDao {
+public class InMemoryTrainingDao implements ITrainingDao {
     private final ConcurrentHashMap<Long, Training> storage;
     private final AtomicLong count = new AtomicLong(0);
 
     public InMemoryTrainingDao(@Qualifier("trainingStorage") ConcurrentHashMap<Long, Training> storage) {
         this.storage = storage;
+        long start = storage.keySet().stream().mapToLong(Long::longValue).max().orElse(0L);
+        this.count.set(start);
     }
 
     @Override
     public Training create(Training entity) {
+        if (entity.getId() != null) {
+            throw new IllegalArgumentException("id must be null on create");
+        }
         long id = count.incrementAndGet();
         entity.setId(id);
         storage.put(id, entity);

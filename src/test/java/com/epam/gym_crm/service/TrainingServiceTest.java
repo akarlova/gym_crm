@@ -16,21 +16,23 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringJUnitConfig(AppConfig.class)
 public class TrainingServiceTest {
-    private final TrainingService trainingService;
-    private final TraineeService traineeService;
-    private final TrainerService trainerService;
+    private final ITrainingService trainingService;
+    private final ITraineeService traineeService;
+    private final ITrainerService trainerService;
 
     private final Map<Long, Training> trainingStorage;
     private final Map<Long, Trainee> traineeStorage;
     private final Map<Long, Trainer> trainerStorage;
 
     @Autowired
-    public TrainingServiceTest(TrainingService trainingService, TraineeService traineeService,
-                               TrainerService trainerService,
+    public TrainingServiceTest(ITrainingService trainingService, ITraineeService traineeService,
+                               ITrainerService trainerService,
                                @Qualifier("trainingStorage") Map<Long, Training> trainingStorage,
                                @Qualifier("traineeStorage") Map<Long, Trainee> traineeStorage,
                                @Qualifier("trainerStorage") Map<Long, Trainer> trainerStorage) {

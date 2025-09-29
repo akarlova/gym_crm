@@ -1,13 +1,13 @@
 package com.epam.gym_crm.util.impl;
 
 import com.epam.gym_crm.domain.User;
-import com.epam.gym_crm.util.UsernameGenerator;
+import com.epam.gym_crm.util.IUsernameGenerator;
 import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 
 @Component
-public class SimpleUsernameGenerator implements UsernameGenerator {
+public class SimpleUsernameGenerator implements IUsernameGenerator {
     @Override
     public String generate(User user) {
 

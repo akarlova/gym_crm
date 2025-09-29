@@ -1,12 +1,12 @@
 package com.epam.gym_crm.util.impl;
 
-import com.epam.gym_crm.util.PasswordGenerator;
+import com.epam.gym_crm.util.IPasswordGenerator;
 import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
 
 @Component
-public class BasePasswordGenerator implements PasswordGenerator {
+public class BasePasswordGenerator implements IPasswordGenerator {
     private static final String ALPHABET =
             "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&_+";
     private static final int LEN = 10;

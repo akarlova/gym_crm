@@ -11,24 +11,24 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringJUnitConfig(AppConfig.class)
 public class TraineeServiceTest {
-    private final TraineeService traineeService;
+    private final ITraineeService traineeService;
     private final Map<Long, Trainee> storage;
 
     @Autowired
-    TraineeServiceTest(TraineeService traineeService,
+    TraineeServiceTest(ITraineeService traineeService,
                        @Qualifier("traineeStorage") Map<Long, Trainee> storage) {
         this.traineeService = traineeService;
         this.storage = storage;
     }
 
-//    @BeforeEach
-//    void clean() {
-//        storage.clear();
-//    }
+    @BeforeEach
+    void clean() {
+        storage.clear();
+    }
 
     @Test
     void handleTwoEqualNamesIntoUsernameTest() {

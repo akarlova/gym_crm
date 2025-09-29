@@ -3,9 +3,9 @@ package com.epam.gym_crm.facade;
 import com.epam.gym_crm.domain.Trainee;
 import com.epam.gym_crm.domain.Trainer;
 import com.epam.gym_crm.domain.Training;
-import com.epam.gym_crm.service.TraineeService;
-import com.epam.gym_crm.service.TrainerService;
-import com.epam.gym_crm.service.TrainingService;
+import com.epam.gym_crm.service.ITraineeService;
+import com.epam.gym_crm.service.ITrainerService;
+import com.epam.gym_crm.service.ITrainingService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,13 +13,13 @@ import java.util.Optional;
 
 @Component
 public class GymFacade {
-    private final TraineeService traineeService;
-    private final TrainerService trainerService;
-    private final TrainingService trainingService;
+    private final ITraineeService traineeService;
+    private final ITrainerService trainerService;
+    private final ITrainingService trainingService;
 
-    public GymFacade(TraineeService traineeService,
-                     TrainerService trainerService,
-                     TrainingService trainingService) {
+    public GymFacade(ITraineeService traineeService,
+                     ITrainerService trainerService,
+                     ITrainingService trainingService) {
         this.traineeService = traineeService;
         this.trainerService = trainerService;
         this.trainingService = trainingService;
