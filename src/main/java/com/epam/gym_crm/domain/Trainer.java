@@ -1,5 +1,6 @@
 package com.epam.gym_crm.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -34,7 +35,7 @@ public class Trainer{
     @NotNull
     private TrainingType specialization;
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
@@ -44,7 +45,7 @@ public class Trainer{
     @ManyToMany(mappedBy = "trainers")
     private Set<Trainee> trainees = new HashSet<>();
 
-    protected Trainer() {
+    public Trainer() {
     }
 
     public Long getId() {

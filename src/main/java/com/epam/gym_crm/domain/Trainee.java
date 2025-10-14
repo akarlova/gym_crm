@@ -36,7 +36,7 @@ public class Trainee {
     @Column(name = "address")
     private String address;
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
@@ -49,7 +49,7 @@ public class Trainee {
             inverseJoinColumns = @JoinColumn(name = "trainer_id"))
     private Set<Trainer> trainers = new HashSet<>();
 
-    protected Trainee() {
+    public Trainee() {
     }
 
     public String getAddress() {

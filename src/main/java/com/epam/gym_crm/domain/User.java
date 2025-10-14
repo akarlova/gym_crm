@@ -45,7 +45,7 @@ public class User {
     @OneToOne (mappedBy = "user")
     private Trainer trainer;
 
-    protected User() {
+    public User() {
     }
 
     public Long getId() {
