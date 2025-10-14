@@ -8,10 +8,12 @@ import com.epam.gym_crm.service.ITrainerService;
 import com.epam.gym_crm.service.ITrainingService;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-@Component
+//@Component
 public class GymFacade {
     private final ITraineeService traineeService;
     private final ITrainerService trainerService;
@@ -30,20 +32,58 @@ public class GymFacade {
         return traineeService.create(trainee);
     }
 
-    public Trainee updateTrainee(Trainee trainee) {
-        return traineeService.update(trainee);
+    public Trainee getTraineeProfile(String username, String password) {
+        return traineeService.getProfile(username, password);
     }
 
-    public Optional<Trainee> findTraineeById(Long id) {
-        return traineeService.findById(id);
+
+    public Trainee updateTraineeProfile(String username, String password,
+                                        String newFirstName, String newLastName,
+                                        LocalDate newDateOfBirth, String newAddress) {
+        return traineeService.updateProfile(username, password, newFirstName,
+                newLastName, newDateOfBirth, newAddress);
     }
+
+    public void changeTraineePassword(String username, String oldPassword, String newPassword) {
+        traineeService.changePassword(username, oldPassword, newPassword);
+    }
+
+    public Trainee setTraineeActive(String username, String password, boolean isActive) {
+        return traineeService.setActive(username, password, isActive);
+    }
+
+    public List<Training> getTraineeTrainings(String username, String password) {
+        return traineeService.getTrainings(username, password);
+    }
+
+    public List<Training> getTraineeTrainingsByDate(String username, String password,
+                                                    LocalDateTime from, LocalDateTime to) {
+        return traineeService.findTrainingsByDateRange(username, password, from, to);
+    }
+
+    public List<Training> getTraineeTrainingsByTrainer(String username, String password, String trainerQuery) {
+        return traineeService.findTrainingsByTrainerName(username, password, trainerQuery);
+    }
+
+    public List<Training> getTraineeTrainingsByType(String username, String password, String typeName) {
+        return traineeService.findTrainingsByType(username, password, typeName);
+    }
+
 
     public List<Trainee> findAllTrainees() {
         return traineeService.findAll();
     }
 
-    public boolean deleteTrainee(Long id) {
-        return traineeService.deleteById(id);
+    public List<Trainer> getNotAssignedTrainers(String username, String password) {
+        return traineeService.findNotAssignedTrainers(username, password);
+    }
+
+    public Trainee updateTraineeTrainers(String username, String password, List<String> trainerUsernames) {
+        return traineeService.updateTrainers(username, password, trainerUsernames);
+    }
+
+    public boolean deleteTraineeByUsername(String username, String password) {
+        return traineeService.deleteByUsername(username, password);
     }
 
     //Trainer
@@ -51,23 +91,53 @@ public class GymFacade {
         return trainerService.create(trainer);
     }
 
-    public Trainer updateTrainer(Trainer trainer) {
-        return trainerService.update(trainer);
+    public Trainer getTrainerProfile(String username, String password) {
+        return trainerService.getProfile(username, password);
     }
 
-    public Optional<Trainer> findTrainerById(Long id) {
-        return trainerService.findById(id);
+    public Trainer updateTrainerProfile(String username, String password,
+                                        String newFirstName, String newLastName) {
+        return trainerService.updateProfile(username, password, newFirstName, newLastName);
+    }
+
+    public void changeTrainerPassword(String username, String oldPassword, String newPassword) {
+        trainerService.changePassword(username, oldPassword, newPassword);
+    }
+
+    public Trainer setTrainerActive(String username, String password, boolean active) {
+        return trainerService.setActive(username, password, active);
+    }
+
+    public List<Training> getTrainerTrainings(String username, String password) {
+        return trainerService.getTrainings(username, password);
+    }
+
+    public List<Training> getTrainerTrainingsByDate(String username, String password,
+                                                    LocalDateTime from, LocalDateTime to) {
+        return trainerService.findTrainingsByDateRange(username, password, from, to);
+    }
+
+    public List<Training> getTrainerTrainingsByTrainee(String username, String password, String traineeQuery) {
+        return trainerService.findTrainingsByTraineeName(username, password, traineeQuery);
+    }
+
+    public List<Training> getTrainerTrainingsByType(String username, String password, String typeName) {
+        return trainerService.findTrainingsByType(username, password, typeName);
     }
 
     public List<Trainer> findAllTrainers() {
         return trainerService.findAll();
     }
 
-    public boolean deleteTrainer(Long id) {
-        return trainerService.deleteById(id);
-    }
-
     //Training
+
+    public Training addTraining(String trainerUsername, String trainerPassword,
+                                String traineeUsername, String trainingName,
+                                String trainingTypeName, LocalDateTime trainingDate,
+                                int durationMinutes) {
+        return trainingService.addTraining(trainerUsername, trainerPassword,
+                traineeUsername, trainingName, trainingTypeName, trainingDate, durationMinutes);
+    }
 
     public Training createTraining(Training training) {
         return trainingService.create(training);
