@@ -6,9 +6,11 @@ import com.epam.gym_crm.domain.User;
 import com.epam.gym_crm.repository.ITraineeRepository;
 import com.epam.gym_crm.repository.ITrainerRepository;
 import com.epam.gym_crm.service.IAuthService;
+import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
+@Service
 public class AuthServiceImpl implements IAuthService {
     private final ITraineeRepository traineeRepo;
     private final ITrainerRepository trainerRepo;

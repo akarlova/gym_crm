@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-//@Component
+@Component
 public class GymFacade {
     private final ITraineeService traineeService;
     private final ITrainerService trainerService;

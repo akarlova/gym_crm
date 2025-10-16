@@ -1,12 +1,8 @@
 package com.epam.gym_crm.service.impl;
 
-import com.epam.gym_crm.dao.ITraineeDao;
-import com.epam.gym_crm.dao.ITrainerDao;
-import com.epam.gym_crm.dao.ITrainingDao;
 import com.epam.gym_crm.domain.Trainee;
 import com.epam.gym_crm.domain.Trainer;
 import com.epam.gym_crm.domain.Training;
-import com.epam.gym_crm.domain.TrainingType;
 import com.epam.gym_crm.repository.ITraineeRepository;
 import com.epam.gym_crm.repository.ITrainerRepository;
 import com.epam.gym_crm.repository.ITrainingRepository;
@@ -21,7 +17,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-//@Service
+@Service
 public class TrainingServiceImpl implements ITrainingService {
     private static final Logger log = LoggerFactory.getLogger(TrainingServiceImpl.class);
 

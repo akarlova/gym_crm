@@ -2,13 +2,16 @@ package com.epam.gym_crm.repository.impl;
 
 import com.epam.gym_crm.config.HibernateUtil;
 import com.epam.gym_crm.domain.Training;
+import com.epam.gym_crm.domain.TrainingType;
 import com.epam.gym_crm.repository.ITrainingRepository;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public class TrainingRepositoryImpl implements ITrainingRepository {
     @Override
     public Training create(Training entity) {
@@ -63,6 +66,18 @@ public class TrainingRepositoryImpl implements ITrainingRepository {
                 transaction.rollback();
             }
             throw e;
+        }
+    }
+
+    @Override
+    public Optional<TrainingType> findTypeByName(String name) {
+        try (Session s = HibernateUtil.getSessionFactory().openSession()) {
+            return s.createQuery("""
+                              from TrainingType tt
+                              where lower(tt.name) = :n
+                            """, TrainingType.class)
+                    .setParameter("n", name.toLowerCase().trim())
+                    .uniqueResultOptional();
         }
     }
 }

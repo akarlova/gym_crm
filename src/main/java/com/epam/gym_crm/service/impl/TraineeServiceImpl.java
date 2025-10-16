@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-//@Service
+@Service
 public class TraineeServiceImpl implements ITraineeService {
     private static final Logger log = LoggerFactory.getLogger(TraineeServiceImpl.class);
     private final ITraineeRepository traineeRepository;

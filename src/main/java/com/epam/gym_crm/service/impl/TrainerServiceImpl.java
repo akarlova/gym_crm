@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 
-//@Service
+@Service
 public class TrainerServiceImpl implements ITrainerService {
     private static final Logger log = LoggerFactory.getLogger(TrainerServiceImpl.class);
     private final ITrainerRepository trainerRepository;
