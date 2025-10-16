@@ -12,6 +12,7 @@
         <property name="hibernate.connection.username">gym_user</property>
         <property name="hibernate.connection.password">12345</property>
 
+
         <!-- Dialect PostgreSQL -->
         <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
 
@@ -20,13 +21,16 @@
         <property name="hibernate.format_sql">true</property>
 
         <!-- Schema -->
-        <property name="hibernate.hbm2ddl.auto">update</property>
+<!--        <property name="hibernate.hbm2ddl.auto">update</property>-->
+        <property name="hibernate.hbm2ddl.auto">validate</property>
 
+        <!--        <property name="hibernate.hbm2ddl.auto">create-drop</property>-->
         <mapping class="com.epam.gym_crm.domain.Trainer"/>
         <mapping class="com.epam.gym_crm.domain.Trainee"/>
         <mapping class="com.epam.gym_crm.domain.TrainingType"/>
         <mapping class="com.epam.gym_crm.domain.Training"/>
         <mapping class="com.epam.gym_crm.domain.User"/>
+
 
     </session-factory>
 </hibernate-configuration>

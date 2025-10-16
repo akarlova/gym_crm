@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: 025-01-link-trainers-trainees
+      author: gym_user
+      changes:
+        - sql:
+            sql: |
+              -- Assign Jon Snow (trainer 101) to John.Snow (trainee 1) и Arya (trainer 102) к Джону тоже
+              INSERT INTO trainer_trainee (trainee_id, trainer_id) VALUES
+                (1, 101),
+                (1, 102)
+              ON CONFLICT DO NOTHING;
+      rollback:
+        - sql: |
+            DELETE FROM trainer_trainee
+            WHERE (trainee_id, trainer_id) IN ((1,101),(1,102));
