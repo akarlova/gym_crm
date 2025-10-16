@@ -46,7 +46,7 @@ public class Training {
     @NotNull
     private Integer trainingDuration;
 
-    protected Training() {
+    public Training() {
     }
 
     public Long getId() {
