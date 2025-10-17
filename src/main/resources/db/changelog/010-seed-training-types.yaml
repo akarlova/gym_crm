@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-01-seed-training-types
+      author: gym_user
+      changes:
+        - sql:
+            splitStatements: true
+            sql: |
+              INSERT INTO training_types (id, training_type_name) VALUES
+                (1, 'STRENGTH'),
+                (2, 'CARDIO'),
+                (3, 'YOGA'),
+                (4, 'PILATES')
+              ON CONFLICT (id) DO NOTHING;
+      rollback:
+        - sql: |
+            DELETE FROM training_types WHERE id IN (1,2,3,4);

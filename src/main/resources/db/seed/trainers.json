@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "firstName": "Ned",
+    "lastName": "Stark",
+    "username": "Ned.Stark",
+    "password": "N8Star_123",
+    "active": true,
+    "specialization": "Strength"
+  },
+  {
+    "id": 2,
+    "firstName": "Tywin",
+    "lastName": "Lannister",
+    "username": "Tywin.Lannister",
+    "password": "Casterly01",
+    "active": true,
+    "specialization": "Strategy"
+  },
+  {
+    "id": 3,
+    "firstName": "Petyr",
+    "lastName": "Baelish",
+    "username": "Petyr.Baelish",
+    "password": "L_finger99",
+    "active": true,
+    "specialization": "Flexibility"
+  },
+  {
+    "id": 4,
+    "firstName": "Stannis",
+    "lastName": "Baratheon",
+    "username": "Stannis.Baratheon",
+    "password": "LightBr1nger",
+    "active": false,
+    "specialization": "Endurance"
+  }
+]

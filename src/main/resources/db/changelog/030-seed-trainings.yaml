@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 030-01-seed-trainings
+      author: gym_user
+      changes:
+        - sql:
+            splitStatements: true
+            sql: |
+              INSERT INTO trainings
+                (id, trainee_id, trainer_id, training_date, duration, training_name, training_type_id)
+              VALUES
+                (1001, 1, 101, TIMESTAMP '2025-10-15 21:40:10', 60, 'Evening workout', 1), -- STRENGTH
+                (1002, 1, 102, TIMESTAMP '2025-10-16 09:00:00', 45, 'Morning run',    2)  -- CARDIO
+              ON CONFLICT (id) DO NOTHING;
+      rollback:
+        - sql: |
+            DELETE FROM trainings WHERE id IN (1001,1002);
