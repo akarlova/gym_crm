@@ -1,0 +1,55 @@
+databaseChangeLog:
+  - changeSet:
+      id: 020-01-seed-users
+      author: gym_user
+      changes:
+        - sql:
+            splitStatements: true
+            sql: |
+              -- Users for trainees
+              INSERT INTO users (id, username, first_name, last_name, password, is_active) VALUES
+                (1, 'John.Snow',        'John',     'Snow',       'Abcde12345',  true),
+                (2, 'Daenerys.Targaryen','Daenerys','Targaryen',  'Qwerty6789',  true),
+                (3, 'Tyrion.Lannister', 'Tyrion',   'Lannister',  'Zxcvb13579',  false)
+              ON CONFLICT (id) DO NOTHING;
+
+              -- Users for trainers
+              INSERT INTO users (id, username, first_name, last_name, password, is_active) VALUES
+                (11, 'Jon.Snow',   'Jon',   'Snow',   'Ghost!',     true),
+                (12, 'Arya.Stark', 'Arya',  'Stark',  'Needle!',    true),
+                (13, 'Bronn',      'Bronn', 'SellSword', 'gold',    true)
+              ON CONFLICT (id) DO NOTHING;
+      rollback:
+        - sql: |
+            DELETE FROM users WHERE id IN (1,2,3,11,12,13);
+
+  - changeSet:
+      id: 020-02-seed-trainees
+      author: gym_user
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO trainees (id, user_id, date_of_birth, address) VALUES
+                (1, 1,  DATE '1992-12-03', 'Winterfell'),
+                (2, 2,  DATE '1990-07-12', 'Dragonstone'),
+                (3, 3,  DATE '1985-01-28', 'Casterly Rock')
+              ON CONFLICT (id) DO NOTHING;
+      rollback:
+        - sql: |
+            DELETE FROM trainees WHERE id IN (1,2,3);
+
+  - changeSet:
+      id: 020-03-seed-trainers
+      author: gym_user
+      changes:
+        - sql:
+            sql: |
+              -- specialization_id = training_types.id
+              INSERT INTO trainers (id, user_id, specialization_id) VALUES
+                (101, 11, 1),  -- Jon Snow -> STRENGTH
+                (102, 12, 2),  -- Arya Stark -> CARDIO
+                (103, 13, 1)   -- Bronn -> STRENGTH
+              ON CONFLICT (id) DO NOTHING;
+      rollback:
+        - sql: |
+            DELETE FROM trainers WHERE id IN (101,102,103);
