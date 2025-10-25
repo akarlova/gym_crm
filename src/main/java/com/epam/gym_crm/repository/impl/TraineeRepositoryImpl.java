@@ -19,20 +19,32 @@ public class TraineeRepositoryImpl implements ITraineeRepository {
     @Override
     public Trainee save(Trainee trainee) {
         Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        Session session = null;
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
             transaction = session.beginTransaction();
+
             if (trainee.getId() == null) {
                 session.persist(trainee);
             } else {
                 trainee = session.merge(trainee);
             }
+
             transaction.commit();
             return trainee;
-        } catch (RuntimeException e) {
-            if (transaction != null) {
-                transaction.rollback();
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) {
+                try {
+                    transaction.rollback();
+                } catch (Exception rollbackEx) {
+                   // log.error("Error during rollback", rollbackEx);
+                }
             }
-            throw e;
+            throw new RuntimeException("Failed to save trainee: " + e.getMessage(), e);
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
         }
     }
 
