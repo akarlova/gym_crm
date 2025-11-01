@@ -5,11 +5,15 @@ import com.epam.gym_crm.domain.Training;
 import com.epam.gym_crm.domain.User;
 import com.epam.gym_crm.repository.ITraineeRepository;
 import com.epam.gym_crm.repository.ITrainerRepository;
+import com.epam.gym_crm.repository.ITrainingRepository;
 import com.epam.gym_crm.service.IAuthService;
 import com.epam.gym_crm.service.ITrainerService;
 import com.epam.gym_crm.util.IPasswordGenerator;
 import com.epam.gym_crm.util.IUsernameGenerator;
 import com.epam.gym_crm.util.impl.SimpleUsernameGenerator;
+import com.epam.gym_crm.web.dto.requestDto.RegisterTrainerRequestDto;
+import com.epam.gym_crm.web.dto.responseDto.RegisterResponseDto;
+import com.epam.gym_crm.web.mapper.RegistrationMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -32,12 +36,13 @@ public class TrainerServiceImpl implements ITrainerService {
                               IUsernameGenerator usernameGenerator,
                               IPasswordGenerator passwordGenerator,
                               IAuthService authService) {
+        this.authService = authService;
         this.trainerRepository = trainerRepository;
         this.traineeRepository = traineeRepository;
         this.usernameGenerator = usernameGenerator;
         this.passwordGenerator = passwordGenerator;
-        this.authService = authService;
     }
+
 
     @Override
     public Trainer create(Trainer trainer) {
@@ -81,7 +86,8 @@ public class TrainerServiceImpl implements ITrainerService {
         }
         Trainer updated = trainerRepository.update(trainer);
         log.info("updateProfile(): updated id={}, username={}", updated.getId(), username);
-        return updated;
+        return trainerRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Trainee not found"));
     }
 
     @Override
@@ -184,7 +190,6 @@ public class TrainerServiceImpl implements ITrainerService {
         log.debug("findAll: size ={}", all.size());
         return all;
     }
-
 
     private String generateUniqueUsername(User user) {
         String baseUsername = usernameGenerator.generate(user);

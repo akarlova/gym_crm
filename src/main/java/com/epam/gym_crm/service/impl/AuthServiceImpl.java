@@ -27,7 +27,7 @@ public class AuthServiceImpl implements IAuthService {
         }
         return traineeRepo.findByUsername(username)
                 .map(Trainee::getUser)
-                .filter(User::isActive)
+//                .filter(User::isActive)
                 .map(User::getPassword)
                 .filter(pwd -> Objects.equals(pwd, rawPassword))
                 .isPresent();
@@ -40,7 +40,7 @@ public class AuthServiceImpl implements IAuthService {
         }
         return trainerRepo.findByUsername(username)
                 .map(Trainer::getUser)
-                .filter(User::isActive)
+//                .filter(User::isActive)
                 .map(User::getPassword)
                 .filter(pwd -> Objects.equals(pwd, rawPassword))
                 .isPresent();

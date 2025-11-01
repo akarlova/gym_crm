@@ -3,6 +3,8 @@ package com.epam.gym_crm.service;
 import com.epam.gym_crm.domain.Trainee;
 import com.epam.gym_crm.domain.Trainer;
 import com.epam.gym_crm.domain.Training;
+import com.epam.gym_crm.web.dto.requestDto.RegisterTrainerRequestDto;
+import com.epam.gym_crm.web.dto.responseDto.RegisterResponseDto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -37,4 +39,5 @@ public interface ITrainerService {
                                        String trainingTypeName);
 
     List<Trainer> findAll();
+
 }

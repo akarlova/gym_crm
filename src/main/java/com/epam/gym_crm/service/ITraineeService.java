@@ -22,6 +22,8 @@ public interface ITraineeService {
 
     Trainee getProfile(String username, String password);
 
+    Trainee getProfile(String username);
+
     void changePassword(String username, String oldPassword, String newPassword);
 
     Trainee setActive(String username, String password, boolean active);
