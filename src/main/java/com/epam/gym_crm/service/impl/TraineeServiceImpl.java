@@ -92,7 +92,8 @@ public class TraineeServiceImpl implements ITraineeService {
         }
         Trainee updated = traineeRepository.update(current);
         log.info("updateProfile(): updated id={}, username={}", updated.getId(), username);
-        return updated;
+        return traineeRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Trainee not found"));
     }
 
     @Override
@@ -219,6 +220,13 @@ public class TraineeServiceImpl implements ITraineeService {
             log.warn("getProfile(): auth failed for username={}", username);
             throw new RuntimeException("Authentication failed");
         }
+        return traineeRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Trainee not found"));
+    }
+
+    @Override
+    public Trainee getProfile(String username) {
+        log.debug("getProfile(): username={}", username);
         return traineeRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Trainee not found"));
     }

@@ -80,4 +80,11 @@ public class TrainingRepositoryImpl implements ITrainingRepository {
                     .uniqueResultOptional();
         }
     }
+
+    @Override
+    public Optional<TrainingType> findTypeById(Long id) {
+        try (Session s = HibernateUtil.getSessionFactory().openSession()) {
+            return Optional.ofNullable(s.find(TrainingType.class, id));
+        }
+    }
 }
