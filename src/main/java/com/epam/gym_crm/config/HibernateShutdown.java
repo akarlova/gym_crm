@@ -1,8 +1,7 @@
 package com.epam.gym_crm.config;
 
+import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PreDestroy;
 
 import static com.epam.gym_crm.config.HibernateUtil.getSessionFactory;
 

@@ -20,17 +20,11 @@ public class TrainerRepositoryImpl implements ITrainerRepository {
         Transaction transaction = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
-            if (trainer.getId() == null) {
-                session.persist(trainer);
-            } else {
-                trainer = session.merge(trainer);
-            }
+            Trainer merged = session.merge(trainer);
             transaction.commit();
-            return trainer;
+            return merged;
         } catch (RuntimeException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
+            if (transaction != null) transaction.rollback();
             throw e;
         }
     }
@@ -39,9 +33,12 @@ public class TrainerRepositoryImpl implements ITrainerRepository {
     public Optional<Trainer> findByUsername(String username) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery("""
-                            select trn
+                            select distinct trn
                             from Trainer trn
                             join fetch trn.user u
+                            left join fetch trn.trainees t
+                            left join fetch t.user tu
+                            left join fetch trn.specialization ts
                             where u.username = :username
                             """, Trainer.class)
                     .setParameter("username", username)

@@ -40,12 +40,14 @@ public class TraineeRepositoryImpl implements ITraineeRepository {
     public Optional<Trainee> findByUsername(String username) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createQuery("""
-                            select distinct tr
-                            from Trainee tr
-                            join fetch tr.user u
-                            left join fetch tr.trainers
-                            where u.username = :username
-                            """, Trainee.class)
+                select distinct tr
+                from Trainee tr
+                join fetch tr.user u
+                left join fetch tr.trainers t
+                left join fetch t.user tu
+                left join fetch t.specialization ts
+                where u.username = :username
+                """, Trainee.class)
                     .setParameter("username", username)
                     .uniqueResultOptional();
         }
@@ -176,13 +178,15 @@ public class TraineeRepositoryImpl implements ITraineeRepository {
                             select trn
                             from Trainer trn
                             join fetch trn.user u1
-                            where trn.id not in (
-                                select trn2.id
-                                from Trainee t
-                                join t.trainers trn2
-                                join t.user u2
-                                where u2.username = :username
-                            )
+                            join fetch trn.specialization ts
+                            where u1.active = true
+                             and trn.id not in (
+                              select trn2.id
+                              from Trainee t
+                              join t.trainers trn2
+                              join t.user u2
+                              where u2.username = :username
+                                               )
                             """, Trainer.class)
                     .setParameter("username", traineeUsername)
                     .getResultList();
