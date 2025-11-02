@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] [%X{transactionId}] %logger - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="REST" level="INFO"/>
+    <logger name="com.epam.gym_crm.service" level="TRACE"/>
+
+    <!-- Dev -->
+    <springProfile name="dev,local">
+        <logger name="org.hibernate.SQL" level="DEBUG"/>
+        <logger name="org.hibernate.orm.jdbc.bind" level="TRACE"/>
+        <logger name="org.hibernate.tool.schema" level="DEBUG"/>
+        <logger name="org.springframework.web.servlet.FrameworkServlet" level="DEBUG"/>
+        <logger name="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" level="DEBUG"/>
+        <logger name="org.springframework.web.servlet.resource" level="DEBUG"/>
+        <logger name="org.springframework.web.servlet.handler" level="DEBUG"/>
+    </springProfile>
+
+    <!-- Prod/stg -->
+    <springProfile name="prod,stg">
+        <logger name="org.hibernate.SQL" level="WARN"/>
+        <logger name="org.hibernate.orm.jdbc.bind" level="WARN"/>
+        <logger name="org.springframework" level="INFO"/>
+    </springProfile>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
