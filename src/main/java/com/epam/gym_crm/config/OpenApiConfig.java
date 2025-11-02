@@ -40,7 +40,8 @@ public class OpenApiConfig {
     GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
                 .group("public")
-                .packagesToScan("com.epam.gym_crm.web")
+                .packagesToScan("com.epam.gym_crm")
+                .pathsToMatch("/**")
                 .build();
     }
 }
