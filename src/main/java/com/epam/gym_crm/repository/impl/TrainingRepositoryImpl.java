@@ -1,90 +1,81 @@
 package com.epam.gym_crm.repository.impl;
 
-import com.epam.gym_crm.config.HibernateUtil;
 import com.epam.gym_crm.domain.Training;
 import com.epam.gym_crm.domain.TrainingType;
 import com.epam.gym_crm.repository.ITrainingRepository;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public class TrainingRepositoryImpl implements ITrainingRepository {
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @Override
+    @Transactional
     public Training create(Training entity) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            Transaction transaction = session.beginTransaction();
-            session.persist(entity);
-            transaction.commit();
-            return entity;
-        }
+        entityManager.persist(entity);
+        return entity;
     }
 
     @Override
+    @Transactional
     public Training update(Training entity) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            Transaction transaction = session.beginTransaction();
-            Training merged = session.merge(entity);
-            transaction.commit();
-            return merged;
-        }
+        return entityManager.merge(entity);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Training> findById(Long id) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return Optional.ofNullable(session.find(Training.class, id));
-        }
+        return Optional.ofNullable(entityManager.find(Training.class, id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Training> findAll() {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createQuery("""
-                    from Training t
-                    order by t.trainingDate desc
-                    """, Training.class).getResultList();
-        }
+        return entityManager.createQuery("""
+                        select t
+                        from Training t
+                        order by t.trainingDate desc
+                        """, Training.class)
+                .getResultList();
     }
 
     @Override
+    @Transactional
     public boolean deleteById(Long id) {
-        Transaction transaction = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            Training training = session.find(Training.class, id);
-            if (training != null) {
-                session.remove(training);
-            }
-            transaction.commit();
-            return training != null;
-        } catch (RuntimeException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            throw e;
+        var entity = entityManager.find(Training.class, id);
+        if (entity != null) {
+            entityManager.remove(entity);
+            return true;
         }
+        return false;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<TrainingType> findTypeByName(String name) {
-        try (Session s = HibernateUtil.getSessionFactory().openSession()) {
-            return s.createQuery("""
-                              from TrainingType tt
-                              where lower(tt.name) = :n
-                            """, TrainingType.class)
-                    .setParameter("n", name.toLowerCase().trim())
-                    .uniqueResultOptional();
-        }
+        String n = name == null ? "" : name.trim().toLowerCase();
+        var list = entityManager.createQuery("""
+            
+                        select tt
+            from TrainingType tt
+            where lower(tt.name) = :n
+            """, TrainingType.class)
+                .setParameter("n", n)
+                .getResultList();
+
+        return list.stream().findFirst();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<TrainingType> findTypeById(Long id) {
-        try (Session s = HibernateUtil.getSessionFactory().openSession()) {
-            return Optional.ofNullable(s.find(TrainingType.class, id));
-        }
+        return Optional.ofNullable(entityManager.find(TrainingType.class, id));
     }
 }

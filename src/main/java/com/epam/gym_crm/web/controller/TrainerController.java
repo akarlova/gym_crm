@@ -119,12 +119,11 @@ public class TrainerController {
     public ResponseEntity<List<TrainerTrainingSummaryDto>> getTrainerTrainings(
             @RequestParam("username") String username,
             @RequestParam(value = "from", required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime from,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam(value = "to", required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-            LocalDateTime to,
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
             @RequestParam(value = "trainee", required = false) String traineeName,
+            @RequestParam(value = "type", required = false) String trainingTypeName,   // <-- ДОБАВИЛИ
             HttpServletRequest httpReq) {
 
         String hUser = httpReq.getHeader("X-Username");
@@ -136,7 +135,10 @@ public class TrainerController {
         List<Training> list;
         if (traineeName != null && !traineeName.isBlank()) {
             list = trainerService.findTrainingsByTraineeName(username, hPass, traineeName);
-        } else if (from != null || to != null) {
+        } else if (trainingTypeName != null && !trainingTypeName.isBlank()) {         // <-- ДОБАВИЛИ
+            list = trainerService.findTrainingsByType(username, hPass, trainingTypeName);
+        }
+        else if (from != null || to != null) {
             if (from == null || to == null) {
                 throw new IllegalArgumentException("Both 'from' and 'to' must be provided together");
             }
