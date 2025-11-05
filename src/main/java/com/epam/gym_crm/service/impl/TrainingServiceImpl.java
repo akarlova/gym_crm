@@ -3,14 +3,18 @@ package com.epam.gym_crm.service.impl;
 import com.epam.gym_crm.domain.Trainee;
 import com.epam.gym_crm.domain.Trainer;
 import com.epam.gym_crm.domain.Training;
+import com.epam.gym_crm.metrics.GymMetrics;
 import com.epam.gym_crm.repository.ITraineeRepository;
 import com.epam.gym_crm.repository.ITrainerRepository;
 import com.epam.gym_crm.repository.ITrainingRepository;
 import com.epam.gym_crm.service.IAuthService;
 import com.epam.gym_crm.service.ITrainingService;
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,7 +33,8 @@ public class TrainingServiceImpl implements ITrainingService {
     public TrainingServiceImpl(ITrainingRepository trainingRepository,
                                ITrainerRepository trainerRepository,
                                ITraineeRepository traineeRepository,
-                               IAuthService authService) {
+                               IAuthService authService
+                               ) {
 
         this.trainingRepository = trainingRepository;
         this.trainerRepository = trainerRepository;
@@ -37,7 +42,7 @@ public class TrainingServiceImpl implements ITrainingService {
         this.authService = authService;
     }
 
-
+    @Transactional
     @Override
     public Training create(Training training) {
         if (training.getTrainee() == null || training.getTrainer() == null) {
@@ -59,7 +64,8 @@ public class TrainingServiceImpl implements ITrainingService {
                 .orElseThrow(() -> new NoSuchElementException("Trainee not found: " +
                                                               training.getTrainee().getId()));
 
-        Training saved = trainingRepository.create(training);
+//        Training saved = trainingRepository.create(training);
+        Training saved = create(training);
         log.info("create(): training id={} (traineeId={}, trainerId={})",
                 saved.getId(), saved.getTrainee().getId(), saved.getTrainer().getId());
         return saved;
@@ -103,6 +109,15 @@ public class TrainingServiceImpl implements ITrainingService {
         return ok;
     }
 
+    @Counted(
+            value = "gym.training",
+            description = "How many trainings were created"
+    )
+    @Timed(
+            value = "gym.training.save",
+            description = "Time to create a training",
+            histogram = true
+    )
     @Override
     public Training addTraining(String trainerUsername, String trainerPassword,
                                 String traineeUsername, String trainingName,

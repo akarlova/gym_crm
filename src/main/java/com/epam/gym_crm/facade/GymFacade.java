@@ -3,9 +3,12 @@ package com.epam.gym_crm.facade;
 import com.epam.gym_crm.domain.Trainee;
 import com.epam.gym_crm.domain.Trainer;
 import com.epam.gym_crm.domain.Training;
+import com.epam.gym_crm.metrics.GymMetrics;
 import com.epam.gym_crm.service.ITraineeService;
 import com.epam.gym_crm.service.ITrainerService;
 import com.epam.gym_crm.service.ITrainingService;
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -18,6 +21,7 @@ public class GymFacade {
     private final ITraineeService traineeService;
     private final ITrainerService trainerService;
     private final ITrainingService trainingService;
+
 
     public GymFacade(ITraineeService traineeService,
                      ITrainerService trainerService,
@@ -130,7 +134,6 @@ public class GymFacade {
     }
 
     //Training
-
     public Training addTraining(String trainerUsername, String trainerPassword,
                                 String traineeUsername, String trainingName,
                                 String trainingTypeName, LocalDateTime trainingDate,
