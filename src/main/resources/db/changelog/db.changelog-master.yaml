@@ -1,6 +1,21 @@
 databaseChangeLog:
-  - include: { file: db/changelog/001-create-tables.yaml }
-  - include: { file: db/changelog/010-seed-training-types.yaml }
-  - include: { file: db/changelog/020-seed-users-trainees-trainers.yaml }
-  - include: { file: db/changelog/025-link-trainers-trainees.yaml }
-  - include: { file: db/changelog/030-seed-trainings.yaml }
+  - include:
+      file: db/changelog/001-create-tables.yaml
+      context: schema
+
+  - include:
+      file: db/changelog/010-seed-training-types.yaml
+      context: schema, seed
+
+  - include:
+      file: db/changelog/020-seed-users-trainees-trainers.yaml
+      context: seed
+
+  - include:
+      file: db/changelog/025-link-trainers-trainees.yaml
+      context: seed
+
+  - include:
+      file: db/changelog/030-seed-trainings.yaml
+      context: seed
+

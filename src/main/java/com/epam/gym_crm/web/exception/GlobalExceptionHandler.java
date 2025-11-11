@@ -3,7 +3,10 @@ package com.epam.gym_crm.web.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolationException;
+import org.postgresql.util.PSQLException;
+import org.postgresql.util.PSQLState;
 import org.slf4j.MDC;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -92,9 +95,22 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleConflict(DataIntegrityViolationException ex,
                                                    HttpServletRequest req, HttpServletResponse res) {
-        String msg = ex.getMostSpecificCause() != null
-                ? ex.getMostSpecificCause().getMessage()
-                : ex.getMessage();
+        String msg = "Data integrity violation (duplicate key or constraint).";
+
+        Throwable root = NestedExceptionUtils.getMostSpecificCause(ex);
+        if (root instanceof PSQLException psql) {
+            String state = psql.getSQLState();
+            if (PSQLState.UNIQUE_VIOLATION.getState().equals(state)) {
+                msg = "Duplicate key: a record with the same unique value already exists.";
+            } else if (PSQLState.FOREIGN_KEY_VIOLATION.getState().equals(state)) {
+                msg = "Foreign key constraint violation.";
+            } else if (PSQLState.CHECK_VIOLATION.getState().equals(state)) {
+                msg = "Check constraint violation.";
+            } else if (PSQLState.NOT_NULL_VIOLATION.getState().equals(state)) {
+                msg = "Not-null constraint violation.";
+            }
+        }
+
         return build(HttpStatus.CONFLICT, "DATA_INTEGRITY_VIOLATION", msg, req, res);
     }
 

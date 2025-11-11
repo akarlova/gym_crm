@@ -30,6 +30,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         if ("/users/ping".equals(path)  && "GET".equals(request.getMethod())) return true;
         if (path.startsWith("/v3/api-docs")) return true;
         if (path.startsWith("/swagger-ui"))  return true;
+        if (path.startsWith("/favicon"))  return true;
 
         String username = request.getHeader("X-Username");
         String password = request.getHeader("X-Password");
