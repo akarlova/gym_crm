@@ -1,0 +1,30 @@
+server:
+  port: 8082
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/gym_crm_stg
+    username: gym_user
+    password: 12345
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    contexts: schema
+  jpa:
+    open-in-view: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - metrics
+          - prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+      roles: ACTUATOR
+  metrics:
+    tags:
+      application: ${spring.application.name}

@@ -1,20 +1,27 @@
 package com.epam.gym_crm.repository.impl;
 
-import com.epam.gym_crm.config.HibernateUtil;
 import com.epam.gym_crm.domain.TrainingType;
 import com.epam.gym_crm.repository.ITrainingTypeRepository;
-import org.hibernate.Session;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Repository
 public class TrainingTypeRepositoryImpl implements ITrainingTypeRepository {
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @Override
+    @Transactional(readOnly = true)
     public List<TrainingType> findAll() {
-        try (Session s = HibernateUtil.getSessionFactory().openSession()) {
-            return s.createQuery("from TrainingType order by name", TrainingType.class)
-                    .getResultList();
-        }
+        return entityManager.createQuery("""
+                        select tt
+                        from TrainingType tt
+                        order by tt.name
+                        """, TrainingType.class)
+                .getResultList();
     }
 }

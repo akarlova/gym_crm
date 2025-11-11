@@ -1,0 +1,60 @@
+#server:
+#  port: 8080
+#
+#spring:
+#  profiles:
+#    active: local
+#  application:
+#    name: gym-crm
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/gym_crm
+#    username: gym_user
+#    password: 12345
+#    driver-class-name: org.postgresql.Driver
+#  jpa:
+#    hibernate:
+#      ddl-auto: validate
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.PostgreSQLDialect
+#
+#  liquibase:
+#    enabled: true
+#    change-log: classpath:/db/changelog/db.changelog-master.yaml
+#
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: health,info,metrics,prometheus
+#  endpoint:
+#    health:
+#      show-details: always
+#  metrics:
+#    tags:
+#      application: gym-crm
+
+spring:
+  application:
+    name: gym-crm
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+  liquibase:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
