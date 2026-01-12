@@ -10,6 +10,7 @@
 
     <modules>
         <module>workload-contract</module>
+        <module>discovery-server</module>
         <module>gym-crm-app</module>
     </modules>
 

@@ -5,6 +5,8 @@ spring:
     password: 12345
     driver-class-name: org.postgresql.Driver
 
+  application:
+    name: gym-crm
   jpa:
     hibernate:
       ddl-auto: validate
@@ -37,3 +39,8 @@ management:
 jwt:
   secret: "u2VjdXJlU3VwZXJMb25nU3VwZXJTZWNyZXRTdHJpbmcyNTY="
   expiration-minutes: 60
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
