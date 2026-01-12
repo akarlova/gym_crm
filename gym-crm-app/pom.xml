@@ -111,6 +111,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+        <!-- My microservice -->
+        <dependency>
+            <groupId>com.epam.gymcrm</groupId>
+            <artifactId>workload-contract</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
 
     </dependencies>
 
