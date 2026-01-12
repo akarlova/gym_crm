@@ -11,6 +11,7 @@
     <modules>
         <module>workload-contract</module>
         <module>discovery-server</module>
+        <module>workload-service</module>
         <module>gym-crm-app</module>
     </modules>
 
