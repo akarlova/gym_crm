@@ -1,7 +1,6 @@
 package com.epam.gym_crm.service;
 
 import com.epam.gym_crm.domain.Training;
-import com.epam.gym_crm.domain.TrainingType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,7 +17,7 @@ public interface ITrainingService {
 
     boolean deleteById(Long id);
 
-    Training addTraining(String trainerUsername, String trainerPassword,
+    Training addTraining(String trainerUsername,
                          String traineeUsername,
                          String trainingName,
                          String trainingTypeName,

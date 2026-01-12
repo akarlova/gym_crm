@@ -3,11 +3,9 @@ package com.epam.gym_crm.service.impl;
 import com.epam.gym_crm.domain.Trainee;
 import com.epam.gym_crm.domain.Trainer;
 import com.epam.gym_crm.domain.Training;
-import com.epam.gym_crm.metrics.GymMetrics;
 import com.epam.gym_crm.repository.ITraineeRepository;
 import com.epam.gym_crm.repository.ITrainerRepository;
 import com.epam.gym_crm.repository.ITrainingRepository;
-import com.epam.gym_crm.service.IAuthService;
 import com.epam.gym_crm.service.ITrainingService;
 import io.micrometer.core.annotation.Counted;
 import io.micrometer.core.annotation.Timed;
@@ -28,18 +26,15 @@ public class TrainingServiceImpl implements ITrainingService {
     private final ITrainingRepository trainingRepository;
     private final ITrainerRepository trainerRepository;
     private final ITraineeRepository traineeRepository;
-    private final IAuthService authService;
 
     public TrainingServiceImpl(ITrainingRepository trainingRepository,
                                ITrainerRepository trainerRepository,
-                               ITraineeRepository traineeRepository,
-                               IAuthService authService
+                               ITraineeRepository traineeRepository
                                ) {
 
         this.trainingRepository = trainingRepository;
         this.trainerRepository = trainerRepository;
         this.traineeRepository = traineeRepository;
-        this.authService = authService;
     }
 
     @Transactional
@@ -64,8 +59,8 @@ public class TrainingServiceImpl implements ITrainingService {
                 .orElseThrow(() -> new NoSuchElementException("Trainee not found: " +
                                                               training.getTrainee().getId()));
 
-//        Training saved = trainingRepository.create(training);
-        Training saved = create(training);
+        Training saved = trainingRepository.create(training);
+//        Training saved = create(training);
         log.info("create(): training id={} (traineeId={}, trainerId={})",
                 saved.getId(), saved.getTrainee().getId(), saved.getTrainer().getId());
         return saved;
@@ -119,13 +114,11 @@ public class TrainingServiceImpl implements ITrainingService {
             histogram = true
     )
     @Override
-    public Training addTraining(String trainerUsername, String trainerPassword,
+    public Training addTraining(String trainerUsername,
                                 String traineeUsername, String trainingName,
                                 String trainingTypeName, LocalDateTime trainingDate,
                                 int durationMinutes) {
-        if (!authService.verifyTrainer(trainerUsername, trainerPassword)) {
-            throw new RuntimeException("Authentication failed");
-        }
+
         if (traineeUsername == null || traineeUsername.isBlank())
             throw new IllegalArgumentException("traineeUsername must not be blank");
         if (trainingName == null || trainingName.isBlank())

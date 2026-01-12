@@ -1,5 +1,6 @@
 package com.epam.gym_crm.config;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import org.springdoc.core.models.GroupedOpenApi;
@@ -10,34 +11,24 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 
 @Configuration
 public class OpenApiConfig {
+    private static final String BEARER_KEY = "bearerAuth";
+
     @Bean
     public OpenAPI openAPI() {
-        SecurityScheme xUser = new SecurityScheme()
-                .type(SecurityScheme.Type.APIKEY)
-                .in(SecurityScheme.In.HEADER)
-                .name("X-Username")
-                .description("Username header");
-
-        SecurityScheme xPass = new SecurityScheme()
-                .type(SecurityScheme.Type.APIKEY)
-                .in(SecurityScheme.In.HEADER)
-                .name("X-Password")
-                .description("Password header");
-
-        SecurityRequirement global = new SecurityRequirement()
-                .addList("X-Username")
-                .addList("X-Password");
+        SecurityScheme bearer = new SecurityScheme()
+                .type(SecurityScheme.Type.HTTP)
+                .scheme("bearer")
+                .bearerFormat("JWT")
+                .description("Paste JWT here (without 'Bearer ')");
 
         return new OpenAPI()
                 .info(new Info().title("Gym CRM API").version("v1"))
-                .schemaRequirement("X-Username", xUser)
-                .schemaRequirement("X-Password", xPass)
-                .addSecurityItem(global);
+                .components(new Components().addSecuritySchemes(BEARER_KEY, bearer))
+                .addSecurityItem(new SecurityRequirement().addList(BEARER_KEY));
     }
 
-
     @Bean
-    GroupedOpenApi publicApi() {
+    public GroupedOpenApi publicApi() {
         return GroupedOpenApi.builder()
                 .group("public")
                 .packagesToScan("com.epam.gym_crm")

@@ -5,17 +5,13 @@ import com.epam.gym_crm.domain.Training;
 import com.epam.gym_crm.domain.User;
 import com.epam.gym_crm.repository.ITraineeRepository;
 import com.epam.gym_crm.repository.ITrainerRepository;
-import com.epam.gym_crm.repository.ITrainingRepository;
-import com.epam.gym_crm.service.IAuthService;
 import com.epam.gym_crm.service.ITrainerService;
 import com.epam.gym_crm.util.IPasswordGenerator;
 import com.epam.gym_crm.util.IUsernameGenerator;
 import com.epam.gym_crm.util.impl.SimpleUsernameGenerator;
-import com.epam.gym_crm.web.dto.requestDto.RegisterTrainerRequestDto;
-import com.epam.gym_crm.web.dto.responseDto.RegisterResponseDto;
-import com.epam.gym_crm.web.mapper.RegistrationMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -29,18 +25,18 @@ public class TrainerServiceImpl implements ITrainerService {
     private final ITraineeRepository traineeRepository;
     private final IUsernameGenerator usernameGenerator;
     private final IPasswordGenerator passwordGenerator;
-    private final IAuthService authService;
+    private final PasswordEncoder passwordEncoder;
 
     public TrainerServiceImpl(ITrainerRepository trainerRepository,
                               ITraineeRepository traineeRepository,
                               IUsernameGenerator usernameGenerator,
                               IPasswordGenerator passwordGenerator,
-                              IAuthService authService) {
-        this.authService = authService;
+                              PasswordEncoder passwordEncoder) {
         this.trainerRepository = trainerRepository;
         this.traineeRepository = traineeRepository;
         this.usernameGenerator = usernameGenerator;
         this.passwordGenerator = passwordGenerator;
+        this.passwordEncoder = passwordEncoder;
     }
 
 
@@ -60,7 +56,9 @@ public class TrainerServiceImpl implements ITrainerService {
             user.setUsername(uniqueUsername);
         }
         if (user.getPassword() == null || user.getPassword().isBlank()) {
-            user.setPassword(passwordGenerator.generate());
+            String rawPassword = passwordGenerator.generate();
+            user.setRawPassword(rawPassword);
+            user.setPassword(passwordEncoder.encode(rawPassword));
             log.debug("create(): generated password (hidden)");
         }
         Trainer saved = trainerRepository.save(trainer);
@@ -69,13 +67,9 @@ public class TrainerServiceImpl implements ITrainerService {
     }
 
     @Override
-    public Trainer updateProfile(String username, String password, String newFirstName,
+    public Trainer updateProfile(String username, String newFirstName,
                                  String newLastName) {
         log.debug("updateProfile(): username={}", username);
-        if (!authService.verifyTrainer(username, password)) {
-            log.warn("updateProfile(): auth failed for {}", username);
-            throw new RuntimeException("Authentication failed");
-        }
         Trainer trainer = trainerRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Trainer not found"));
         if (newFirstName != null) {
@@ -91,12 +85,8 @@ public class TrainerServiceImpl implements ITrainerService {
     }
 
     @Override
-    public Trainer getProfile(String username, String password) {
+    public Trainer getProfile(String username) {
         log.debug("getProfile(): username={}", username);
-        if (!authService.verifyTrainer(username, password)) {
-            log.warn("getProfile(): auth failed for {}", username);
-            throw new RuntimeException("Authentication failed");
-        }
         return trainerRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Trainer not found"));
     }
@@ -104,27 +94,28 @@ public class TrainerServiceImpl implements ITrainerService {
     @Override
     public void changePassword(String username, String oldPassword, String newPassword) {
         log.debug("changePassword(): username={}", username);
-        if (!authService.verifyTrainer(username, oldPassword)) {
-            log.warn("changePassword(): auth failed for {}", username);
-            throw new RuntimeException("Authentication failed");
-        }
+
         if (newPassword == null || newPassword.isBlank()) {
             throw new IllegalArgumentException("Password must not be blank");
         }
         Trainer trainer = trainerRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Trainer not found"));
-        trainer.getUser().setPassword(newPassword);
+        String storedHash = trainer.getUser().getPassword(); // BCrypt
+
+        if (!passwordEncoder.matches(oldPassword, storedHash)) {
+            log.warn("changePassword(): old password mismatch for {}", username);
+            throw new RuntimeException("Old password is incorrect");
+        }
+        String newHash = passwordEncoder.encode(newPassword);
+        trainer.getUser().setPassword(newHash);
         trainerRepository.update(trainer);
-        log.info("changePassword(): password changed for {}", username);
+        log.info("changePassword(): password updated for {}", username);
     }
 
     @Override
-    public Trainer setActive(String username, String password, boolean isActive) {
+    public Trainer setActive(String username, boolean isActive) {
         log.debug("setActive(): username={}, isActive={}", username, isActive);
-        if (!authService.verifyTrainer(username, password)) {
-            log.warn("setActive(): auth failed for {}", username);
-            throw new RuntimeException("Authentication failed");
-        }
+
         Trainer trainer = trainerRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Trainer not found"));
         trainer.getUser().setActive(isActive);
@@ -134,23 +125,16 @@ public class TrainerServiceImpl implements ITrainerService {
     }
 
     @Override
-    public List<Training> getTrainings(String username, String password) {
+    public List<Training> getTrainings(String username) {
         log.debug("getTrainings(): username={}", username);
-        if (!authService.verifyTrainer(username, password)) {
-            log.warn("getTrainings(): auth failed for {}", username);
-            throw new RuntimeException("Authentication failed");
-        }
         return trainerRepository.findTrainings(username);
     }
 
     @Override
-    public List<Training> findTrainingsByDateRange(String username, String password,
+    public List<Training> findTrainingsByDateRange(String username,
                                                    LocalDateTime from, LocalDateTime to) {
         log.debug("findTrainingsByDateRange(): username={}, {}..{}", username, from, to);
-        if (!authService.verifyTrainer(username, password)) {
-            log.warn("findTrainingsByDateRange(): auth failed for {}", username);
-            throw new RuntimeException("Authentication failed");
-        }
+
         if (from == null || to == null) throw new IllegalArgumentException("from/to must not be null");
         if (from.isAfter(to)) throw new IllegalArgumentException("from must be <= to");
 
@@ -158,26 +142,16 @@ public class TrainerServiceImpl implements ITrainerService {
     }
 
     @Override
-    public List<Training> findTrainingsByTraineeName(String trainerUsername,
-                                                     String trainerPassword, String traineeName) {
+    public List<Training> findTrainingsByTraineeName(String trainerUsername, String traineeName) {
         log.debug("findTrainingsByTraineeName(): username={}, traineeName='{}'",
                 trainerUsername, traineeName);
-        if (!authService.verifyTrainer(trainerUsername, trainerPassword)) {
-            log.warn("findTrainingsByTraineeName(): auth failed for {}", trainerUsername);
-            throw new RuntimeException("Authentication failed");
-        }
         String trainee = traineeName == null ? "" : traineeName.trim();
         return trainerRepository.findTrainingsByTraineeName(trainerUsername, trainee);
     }
 
     @Override
-    public List<Training> findTrainingsByType(String username, String password,
-                                              String trainingTypeName) {
+    public List<Training> findTrainingsByType(String username, String trainingTypeName) {
         log.debug("findTrainingsByType(): username={}, type='{}'", username, trainingTypeName);
-        if (!authService.verifyTrainer(username, password)) {
-            log.warn("findTrainingsByType(): auth failed for {}", username);
-            throw new RuntimeException("Authentication failed");
-        }
         if (trainingTypeName == null || trainingTypeName.isBlank()) {
             throw new IllegalArgumentException("trainingTypeName must not be blank");
         }

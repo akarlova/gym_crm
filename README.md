@@ -3,5 +3,6 @@
 Sring Core: done
 ORM/Hibbernate: done
 REST: done
-Spring Boot: in progress...
+Spring Boot: done
+Spring Security: in progress...
 

@@ -6,13 +6,14 @@ import com.epam.gym_crm.web.exception.UnauthorizedException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/trainings")
@@ -31,16 +32,14 @@ public class TrainingController {
     @ApiResponse(responseCode = "401", description = "Unauthorized / credentials mismatch")
     @ApiResponse(responseCode = "409", description = "Data conflict")
     public ResponseEntity<Void> addTraining(@Valid @RequestBody AddTrainingRequestDto req,
-                                            HttpServletRequest httpReq) {
-        String hUser = httpReq.getHeader("X-Username");
-        String hPass = httpReq.getHeader("X-Password");
-        if (hUser == null || hPass == null || !hUser.equals(req.getTrainerUsername())) {
+                                            Principal principal) {
+        String trainerUsername = principal.getName();
+        if (req.getTrainerUsername() != null
+            && !req.getTrainerUsername().trim().equals(trainerUsername)) {
             throw new UnauthorizedException("Credentials mismatch");
         }
-
         gymFacade.addTraining(
-                req.getTrainerUsername(),
-                hPass,
+                trainerUsername,
                 req.getTraineeUsername(),
                 req.getTrainingName(),
                 req.getTrainingTypeName(),
