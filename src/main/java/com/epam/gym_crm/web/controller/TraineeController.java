@@ -13,7 +13,6 @@ import com.epam.gym_crm.web.dto.responseDto.TraineeProfileResponseDto;
 import com.epam.gym_crm.web.dto.responseDto.TraineeProfileWithUsernameResponseDto;
 import com.epam.gym_crm.web.dto.responseDto.TraineeTrainingSummaryDto;
 import com.epam.gym_crm.web.dto.responseDto.TrainerSummaryDto;
-import com.epam.gym_crm.web.exception.UnauthorizedException;
 import com.epam.gym_crm.web.mapper.RegistrationMapper;
 import com.epam.gym_crm.web.mapper.TraineeProfileMapper;
 import com.epam.gym_crm.web.mapper.TrainingMapper;
@@ -21,7 +20,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -68,7 +67,8 @@ public class TraineeController {
 
         return new RegisterResponseDto(
                 created.getUser().getUsername(),
-                created.getUser().getPassword()
+//                created.getUser().getPassword()
+                entity.getUser().getRawPassword()
         );
     }
 
@@ -78,11 +78,9 @@ public class TraineeController {
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "404", description = "Trainee not found")
     public ResponseEntity<TraineeProfileResponseDto> getTraineeProfile(
-            @RequestParam("username") String username) {
+            Principal principal) {
+        String username = principal.getName();
         Trainee trainee = traineeService.getProfile(username);
-        if (trainee == null) {
-            return ResponseEntity.badRequest().build();
-        }
         return ResponseEntity.ok(profileMapper.toDto(trainee));
     }
 
@@ -93,62 +91,41 @@ public class TraineeController {
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     public ResponseEntity<TraineeProfileWithUsernameResponseDto> updateTraineeProfile(
             @Valid @RequestBody UpdateTraineeProfileRequestDto dto,
-            HttpServletRequest req) {
-
-        String username = req.getHeader("X-Username");
-        String password = req.getHeader("X-Password");
+            Principal principal) {
+        String username = principal.getName();
 
         Trainee updated = traineeService.updateProfile(
                 username,
-                password,
                 dto.getFirstName(),
                 dto.getLastName(),
                 dto.getDateOfBirth(),
                 dto.getAddress()
         );
         if (updated.getUser().isActive() != dto.getActive()) {
-            updated = traineeService.setActive(username, password, dto.getActive());
+            updated = traineeService.setActive(username, dto.getActive());
         }
         return ResponseEntity.ok(profileMapper.toDtoWithUsername(updated));
     }
     @DeleteMapping("/profile")
     @Operation(summary = "delete trainee profile")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Deleted (idempotent)"),
+            @ApiResponse(responseCode = "204", description = "Deleted (idempotent)"),
             @ApiResponse(responseCode = "400", description = "Username mismatch"),
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    public ResponseEntity<Void> deleteTraineeProfile(
-            @RequestParam("username") String username,
-            HttpServletRequest req) {
-
-        String hUser = req.getHeader("X-Username");
-        String hPass = req.getHeader("X-Password");
-
-        if (hUser == null || hPass == null || !hUser.equals(username)) {
-            throw new UnauthorizedException("Credentials mismatch");
-        }
-
-        traineeService.deleteByUsername(username, hPass);
-
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> deleteTraineeProfile(Principal principal) {
+        String username = principal.getName();
+        traineeService.deleteByUsername(username);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/not-assigned-trainers")
     @Operation(summary = "Get active trainers not assigned to the trainee")
     @ApiResponse(responseCode = "200", description = "OK")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
-    public ResponseEntity<List<TrainerSummaryDto>> getNotAssignedTrainers(
-            @RequestParam("username") String username,
-            HttpServletRequest req) {
-
-        String hUser = req.getHeader("X-Username");
-        String hPass = req.getHeader("X-Password");
-        if (hUser == null || hPass == null || !hUser.equals(username)) {
-            throw new UnauthorizedException("Credentials mismatch");
-        }
-
-        List<Trainer> trainers = traineeService.findNotAssignedTrainers(username, hPass);
+    public ResponseEntity<List<TrainerSummaryDto>> getNotAssignedTrainers(Principal principal) {
+        String username = principal.getName();
+        List<Trainer> trainers = traineeService.findNotAssignedTrainers(username);
         List<TrainerSummaryDto> dto = trainers.stream()
                 .map(profileMapper::toTrainerSummary)
                 .toList();
@@ -162,19 +139,14 @@ public class TraineeController {
     @ApiResponse(responseCode = "401", description = "Unauthorized / credentials mismatch")
     public ResponseEntity<List<TrainerSummaryDto>> updateTraineeTrainers(
             @Valid @RequestBody UpdateTraineeTrainersRequestDto req,
-            HttpServletRequest httpReq) {
+            Principal principal) {
+        String username = principal.getName();
 
-        String hUser = httpReq.getHeader("X-Username");
-        String hPass = httpReq.getHeader("X-Password");
-        if (hUser == null || hPass == null || !hUser.equals(req.getUsername())) {
-            throw new UnauthorizedException("Credentials mismatch");
-        }
+        Trainee updated = traineeService.updateTrainers(username, req.getTrainerUsernames());
 
-        traineeService.updateTrainers(req.getUsername(), hPass, req.getTrainerUsernames());
+        Trainee fresh = traineeService.getProfile(username);
 
-        Trainee fresh = traineeService.getProfile(req.getUsername(), hPass);
-
-        List<TrainerSummaryDto> out = fresh.getTrainers().stream()
+        List<TrainerSummaryDto> out = fresh .getTrainers().stream()
                 .map(profileMapper::toTrainerSummary)
                 .toList();
 
@@ -185,7 +157,6 @@ public class TraineeController {
     @ApiResponse(responseCode = "200", description = "OK")
     @ApiResponse(responseCode = "401", description = "Unauthorized / credentials mismatch")
     public ResponseEntity<List<TraineeTrainingSummaryDto>> getTraineeTrainings(
-            @RequestParam("username") String username,
             @RequestParam(value = "from", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             LocalDateTime from,
@@ -194,13 +165,8 @@ public class TraineeController {
             LocalDateTime to,
             @RequestParam(value = "trainer", required = false) String trainerName,
             @RequestParam(value = "type", required = false) String trainingType,
-            HttpServletRequest httpReq) {
-
-        String hUser = httpReq.getHeader("X-Username");
-        String hPass = httpReq.getHeader("X-Password");
-        if (hUser == null || hPass == null || !hUser.equals(username)) {
-            throw new com.epam.gym_crm.web.exception.UnauthorizedException("Credentials mismatch");
-        }
+            Principal principal) {
+        String username = principal.getName();
 
         List<Training> list;
         if (from != null || to != null) {
@@ -210,15 +176,14 @@ public class TraineeController {
             if (from.isAfter(to)) {
                 throw new IllegalArgumentException("'from' must be <= 'to'");
             }
-            list = traineeService.findTrainingsByDateRange(username, hPass, from, to);
+            list = traineeService.findTrainingsByDateRange(username, from, to);
         } else if (trainerName != null && !trainerName.isBlank()) {
-            list = traineeService.findTrainingsByTrainerName(username, hPass, trainerName);
+            list = traineeService.findTrainingsByTrainerName(username, trainerName);
         } else if (trainingType != null && !trainingType.isBlank()) {
-            list = traineeService.findTrainingsByType(username, hPass, trainingType);
+            list = traineeService.findTrainingsByType(username, trainingType);
         } else {
-            list = traineeService.getTrainings(username, hPass);
+            list = traineeService.getTrainings(username);
         }
-
         List<TraineeTrainingSummaryDto> out = list.stream()
                 .map(trainingMapper::toSummary)
                 .toList();
@@ -235,15 +200,13 @@ public class TraineeController {
     })
     public ResponseEntity<Void> changeActiveStatus(
             @Valid @RequestBody ChangeActiveRequestDto dto,
-            HttpServletRequest httpReq) {
+            Principal principal) {
 
-        String hUser = httpReq.getHeader("X-Username");
-        String hPass = httpReq.getHeader("X-Password");
-        if (hUser == null || hPass == null || !hUser.equals(dto.getUsername())) {
-            throw new UnauthorizedException("Credentials mismatch");
+        String username = principal.getName();
+        if (dto.getActive() == null) {
+            throw new IllegalArgumentException("'active' must not be null");
         }
-
-        traineeService.setActive(dto.getUsername(), hPass, dto.getActive());
+        traineeService.setActive(username, dto.getActive());
         return ResponseEntity.ok().build();
     }
 }

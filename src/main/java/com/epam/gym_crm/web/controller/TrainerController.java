@@ -11,7 +11,6 @@ import com.epam.gym_crm.web.dto.responseDto.RegisterResponseDto;
 import com.epam.gym_crm.web.dto.responseDto.TrainerProfileResponseDto;
 import com.epam.gym_crm.web.dto.responseDto.TrainerProfileWithUsernameResponseDto;
 import com.epam.gym_crm.web.dto.responseDto.TrainerTrainingSummaryDto;
-import com.epam.gym_crm.web.exception.UnauthorizedException;
 import com.epam.gym_crm.web.mapper.RegistrationMapper;
 import com.epam.gym_crm.web.mapper.TrainerProfileMapper;
 import com.epam.gym_crm.web.mapper.TrainingMapper;
@@ -19,7 +18,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -67,7 +66,8 @@ public class TrainerController {
         Trainer created = trainerService.create(entity);
         return new RegisterResponseDto(
                 created.getUser().getUsername(),
-                created.getUser().getPassword()
+//                created.getUser().getPassword()
+                entity.getUser().getRawPassword()
         );
     }
     @GetMapping("/profile")
@@ -76,16 +76,9 @@ public class TrainerController {
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "404", description = "Trainer not found")
     public ResponseEntity<TrainerProfileResponseDto> getTrainerProfile(
-            @RequestParam("username") String username,
-            HttpServletRequest req) {
-
-        String hUser = req.getHeader("X-Username");
-        String hPass = req.getHeader("X-Password");
-        if (hUser == null || hPass == null || !hUser.equals(username)) {
-            throw new UnauthorizedException("Credentials mismatch");
-        }
-
-        var trainer = trainerService.getProfile(username, hPass);
+            Principal principal) {
+        String username = principal.getName();
+        var trainer = trainerService.getProfile(username);
         return ResponseEntity.ok(trainerProfileMapper.toDto(trainer));
     }
     @PutMapping(path = "/profile", consumes = "application/json")
@@ -98,18 +91,14 @@ public class TrainerController {
     })
     public ResponseEntity<TrainerProfileWithUsernameResponseDto> updateTrainerProfile(
             @Valid @RequestBody UpdateTrainerProfileRequestDto req,
-            HttpServletRequest httpReq) {
+            Principal principal) {
 
-        String hUser = httpReq.getHeader("X-Username");
-        String hPass = httpReq.getHeader("X-Password");
-        if (hUser == null || hPass == null || !hUser.equals(req.getUsername())) {
-            throw new UnauthorizedException("Credentials mismatch");
-        }
+        String username = principal.getName();
 
-        trainerService.updateProfile(req.getUsername(), hPass, req.getFirstName(), req.getLastName());
-        trainerService.setActive(req.getUsername(), hPass, req.getActive());
+        trainerService.updateProfile(username, req.getFirstName(), req.getLastName());
+        trainerService.setActive(username, req.getActive());
 
-        var trainer = trainerService.getProfile(req.getUsername(), hPass);
+        var trainer = trainerService.getProfile(username);
         return ResponseEntity.ok(trainerProfileMapper.toDtoWithUsername(trainer));
     }
     @GetMapping("/trainings")
@@ -117,26 +106,21 @@ public class TrainerController {
     @ApiResponse(responseCode = "200", description = "OK")
     @ApiResponse(responseCode = "401", description = "Unauthorized / credentials mismatch")
     public ResponseEntity<List<TrainerTrainingSummaryDto>> getTrainerTrainings(
-            @RequestParam("username") String username,
             @RequestParam(value = "from", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam(value = "to", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
             @RequestParam(value = "trainee", required = false) String traineeName,
-            @RequestParam(value = "type", required = false) String trainingTypeName,   // <-- ДОБАВИЛИ
-            HttpServletRequest httpReq) {
+            @RequestParam(value = "type", required = false) String trainingTypeName,
+            Principal principal) {
 
-        String hUser = httpReq.getHeader("X-Username");
-        String hPass = httpReq.getHeader("X-Password");
-        if (hUser == null || hPass == null || !hUser.equals(username)) {
-            throw new UnauthorizedException("Credentials mismatch");
-        }
+        String username = principal.getName();
 
         List<Training> list;
         if (traineeName != null && !traineeName.isBlank()) {
-            list = trainerService.findTrainingsByTraineeName(username, hPass, traineeName);
-        } else if (trainingTypeName != null && !trainingTypeName.isBlank()) {         // <-- ДОБАВИЛИ
-            list = trainerService.findTrainingsByType(username, hPass, trainingTypeName);
+            list = trainerService.findTrainingsByTraineeName(username, traineeName);
+        } else if (trainingTypeName != null && !trainingTypeName.isBlank()) {
+            list = trainerService.findTrainingsByType(username, trainingTypeName);
         }
         else if (from != null || to != null) {
             if (from == null || to == null) {
@@ -145,9 +129,9 @@ public class TrainerController {
             if (from.isAfter(to)) {
                 throw new IllegalArgumentException("'from' must be <= 'to'");
             }
-            list = trainerService.findTrainingsByDateRange(username, hPass, from, to);
+            list = trainerService.findTrainingsByDateRange(username, from, to);
         } else {
-            list = trainerService.getTrainings(username, hPass);
+            list = trainerService.getTrainings(username);
         }
 
         List<TrainerTrainingSummaryDto> out = list.stream()
@@ -166,15 +150,13 @@ public class TrainerController {
     })
     public ResponseEntity<Void> changeActiveStatus(
             @Valid @RequestBody ChangeActiveRequestDto dto,
-            HttpServletRequest httpReq) {
+            Principal principal) {
+        String username = principal.getName();
 
-        String hUser = httpReq.getHeader("X-Username");
-        String hPass = httpReq.getHeader("X-Password");
-        if (hUser == null || hPass == null || !hUser.equals(dto.getUsername())) {
-            throw new UnauthorizedException("Credentials mismatch");
+        if (dto.getActive() == null) {
+            throw new IllegalArgumentException("'active' must not be null");
         }
-
-        trainerService.setActive(dto.getUsername(), hPass, dto.getActive());
+        trainerService.setActive(username, dto.getActive());
         return ResponseEntity.ok().build();
     }
 }

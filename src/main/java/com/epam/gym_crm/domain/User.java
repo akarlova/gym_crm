@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -32,6 +33,9 @@ public class User {
     @NotBlank
     private String username;
 
+    @Transient
+    private String rawPassword;
+
     @Column(name = "password", nullable = false)
     @NotBlank
     private String password;
@@ -51,10 +55,6 @@ public class User {
     public Long getId() {
         return id;
     }
-
-//    public void setId(Long id) {
-//        this.id = id;
-//    }
 
     public String getFirstName() {
         return firstName;
@@ -102,6 +102,14 @@ public class User {
 
     public Trainer getTrainer() {
         return trainer;
+    }
+
+    public String getRawPassword() {
+        return rawPassword;
+    }
+
+    public void setRawPassword(String rawPassword) {
+        this.rawPassword = rawPassword;
     }
 
     @Override

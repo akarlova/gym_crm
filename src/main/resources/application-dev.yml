@@ -15,7 +15,7 @@ spring:
 
   jackson:
     serialization:
-      WRITE_DATES_AS_TIMESTAMPS: false
+      write-dates-as-timestamps: false
 
 server:
   port: 8081
@@ -33,3 +33,7 @@ management:
   metrics:
     tags:
       application: ${spring.application.name}
+
+jwt:
+  secret: "u2VjdXJlU3VwZXJMb25nU3VwZXJTZWNyZXRTdHJpbmcyNTY="
+  expiration-minutes: 60
