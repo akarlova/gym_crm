@@ -118,13 +118,17 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
-        <!-- Eureka service -->
+        <!-- Eureka client -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
 
-
+        <!-- Circuit breaker  -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+        </dependency>
 
     </dependencies>
 

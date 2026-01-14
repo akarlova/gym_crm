@@ -3,10 +3,13 @@ package com.epam.gym_crm.service.impl;
 import com.epam.gym_crm.domain.Trainee;
 import com.epam.gym_crm.domain.Trainer;
 import com.epam.gym_crm.domain.Training;
+import com.epam.gym_crm.integration.WorkloadClient;
 import com.epam.gym_crm.repository.ITraineeRepository;
 import com.epam.gym_crm.repository.ITrainerRepository;
 import com.epam.gym_crm.repository.ITrainingRepository;
 import com.epam.gym_crm.service.ITrainingService;
+import com.epam.gym_crm.workload.contract.ActionType;
+import com.epam.gym_crm.workload.contract.TrainerWorkloadRequest;
 import io.micrometer.core.annotation.Counted;
 import io.micrometer.core.annotation.Timed;
 import org.slf4j.Logger;
@@ -26,15 +29,18 @@ public class TrainingServiceImpl implements ITrainingService {
     private final ITrainingRepository trainingRepository;
     private final ITrainerRepository trainerRepository;
     private final ITraineeRepository traineeRepository;
+    private final WorkloadClient workloadClient;
 
     public TrainingServiceImpl(ITrainingRepository trainingRepository,
                                ITrainerRepository trainerRepository,
-                               ITraineeRepository traineeRepository
+                               ITraineeRepository traineeRepository,
+                               WorkloadClient workloadClient
                                ) {
 
         this.trainingRepository = trainingRepository;
         this.trainerRepository = trainerRepository;
         this.traineeRepository = traineeRepository;
+        this.workloadClient = workloadClient;
     }
 
     @Transactional
@@ -60,9 +66,10 @@ public class TrainingServiceImpl implements ITrainingService {
                                                               training.getTrainee().getId()));
 
         Training saved = trainingRepository.create(training);
-//        Training saved = create(training);
+
         log.info("create(): training id={} (traineeId={}, trainerId={})",
                 saved.getId(), saved.getTrainee().getId(), saved.getTrainer().getId());
+
         return saved;
     }
 
@@ -151,6 +158,21 @@ public class TrainingServiceImpl implements ITrainingService {
         training.setTrainingDate(trainingDate);
         training.setTrainingDuration(durationMinutes);
 
-        return trainingRepository.create(training);
+        Training saved = trainingRepository.create(training);
+
+        TrainerWorkloadRequest req = new TrainerWorkloadRequest();
+        req.setTrainerUsername(trainer.getUser().getUsername());
+        req.setTrainerFirstName(trainer.getUser().getFirstName());
+        req.setTrainerLastName(trainer.getUser().getLastName());
+        req.setActive(trainer.getUser().isActive());
+        req.setTrainingDate(saved.getTrainingDate().toLocalDate());
+        req.setTrainingDurationMinutes(saved.getTrainingDuration());
+        req.setActionType(ActionType.ADD);
+
+        log.info("Sending workload ADD for trainer={}, date={}, minutes={}",
+                trainer.getUser().getUsername(), saved.getTrainingDate(), saved.getTrainingDuration());
+        workloadClient.send(req);
+
+        return saved;
     }
 }
