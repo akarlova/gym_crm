@@ -78,4 +78,20 @@ public class TrainingRepositoryImpl implements ITrainingRepository {
     public Optional<TrainingType> findTypeById(Long id) {
         return Optional.ofNullable(entityManager.find(TrainingType.class, id));
     }
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Training> findByIdWithTrainerUser(Long id) {
+        var list = entityManager.createQuery("""
+            select t
+            from Training t
+            join fetch t.trainer tr
+            join fetch tr.user u
+            where t.id = :id
+            """, Training.class)
+                .setParameter("id", id)
+                .getResultList();
+
+        return list.stream().findFirst();
+    }
+
 }

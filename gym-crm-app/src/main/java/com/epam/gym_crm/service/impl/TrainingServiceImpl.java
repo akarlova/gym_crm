@@ -101,15 +101,42 @@ public class TrainingServiceImpl implements ITrainingService {
     }
 
     @Override
+    @Transactional
     public boolean deleteById(Long id) {
-        boolean ok = trainingRepository.deleteById(id);
-        if (ok) {
-            log.info("deleteById(): training deleted id={}", id);
-        } else {
+
+        Training training = trainingRepository.findByIdWithTrainerUser(id).orElse(null);
+        if (training == null) {
             log.warn("deleteById(): training id={} not found", id);
+            return false;
         }
-        return ok;
+
+        boolean ok = trainingRepository.deleteById(id);
+        if (!ok) {
+            log.warn("deleteById(): training id={} not deleted", id);
+            return false;
+        }
+
+        log.info("deleteById(): training deleted id={}", id);
+
+        Trainer trainer = training.getTrainer();
+
+        TrainerWorkloadRequest req = new TrainerWorkloadRequest();
+        req.setTrainerUsername(trainer.getUser().getUsername());
+        req.setTrainerFirstName(trainer.getUser().getFirstName());
+        req.setTrainerLastName(trainer.getUser().getLastName());
+        req.setActive(trainer.getUser().isActive());
+        req.setTrainingDate(training.getTrainingDate().toLocalDate());
+        req.setTrainingDurationMinutes(training.getTrainingDuration());
+        req.setActionType(ActionType.DELETE);
+
+        log.info("Sending workload DELETE: trainer={}, date={}, minutes={}",
+                req.getTrainerUsername(), req.getTrainingDate(), req.getTrainingDurationMinutes());
+
+        workloadClient.send(req);
+
+        return true;
     }
+
 
     @Counted(
             value = "gym.training",

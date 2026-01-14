@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface ITrainingRepository extends ICrudRepository<Training, Long> {
     Optional<TrainingType> findTypeByName(String name);
     Optional<TrainingType> findTypeById(Long id);
+    Optional<Training> findByIdWithTrainerUser(Long id);
+
 }
