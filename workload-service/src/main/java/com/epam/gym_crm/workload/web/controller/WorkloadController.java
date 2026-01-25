@@ -30,7 +30,7 @@ public class WorkloadController {
             || req.getTrainingDate() == null
             || req.getTrainingDurationMinutes() <= 0
             || req.getActionType() == null) {
-            return ResponseEntity.badRequest().body("Invalid request payload");
+            throw new IllegalArgumentException("Invalid request payload");
         }
 
         service.apply(req);

@@ -59,6 +59,10 @@ integration:
   jwt:
     secret: "u2VjdXJlU3VwZXJMb25nU3VwZXJTZWNyZXRTdHJpbmcyNTY="
     expiration-minutes: 120
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %-5level [%X{tx}] %logger{36} - %msg%n"
+
 
 
 

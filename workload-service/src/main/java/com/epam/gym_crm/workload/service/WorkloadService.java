@@ -5,12 +5,15 @@ import com.epam.gym_crm.workload.contract.TrainerWorkloadRequest;
 import com.epam.gym_crm.workload.domain.TrainerMonthlyWorkload;
 import com.epam.gym_crm.workload.web.dto.MonthlyWorkloadResponse;
 import com.epam.gym_crm.workload.repo.ITrainerMonthlyWorkloadRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class WorkloadService {
     private final ITrainerMonthlyWorkloadRepository repo;
+    private static final Logger log = LoggerFactory.getLogger(WorkloadService.class);
 
     public WorkloadService(ITrainerMonthlyWorkloadRepository repo) {
         this.repo = repo;
@@ -20,6 +23,9 @@ public class WorkloadService {
     public void apply(TrainerWorkloadRequest req) {
         int year = req.getTrainingDate().getYear();
         int month = req.getTrainingDate().getMonthValue();
+
+        log.info("WORKLOAD apply: action={}, trainer={}, date={}, minutes={}",
+                req.getActionType(), req.getTrainerUsername(), req.getTrainingDate(), req.getTrainingDurationMinutes());
 
         TrainerMonthlyWorkload row = repo
                 .findByTrainerUsernameAndYearAndMonth(req.getTrainerUsername(), year, month)
@@ -42,13 +48,19 @@ public class WorkloadService {
         int cur = row.getTotalMinutes();
         int delta = req.getTrainingDurationMinutes();
 
+        int updated;
         if (req.getActionType() == ActionType.ADD) {
-            row.setTotalMinutes(cur + delta);
+            updated = cur + delta;
         } else if (req.getActionType() == ActionType.DELETE) {
-            row.setTotalMinutes(Math.max(0, cur - delta));
+            updated = Math.max(0, cur - delta);
         } else {
             throw new IllegalArgumentException("Unknown actionType: " + req.getActionType());
         }
+
+        row.setTotalMinutes(updated);
+
+        log.info("WORKLOAD updated: trainer={}, year={}, month={}, totalMinutes {} -> {}",
+                row.getTrainerUsername(), year, month, cur, updated);
 
         repo.save(row);
     }

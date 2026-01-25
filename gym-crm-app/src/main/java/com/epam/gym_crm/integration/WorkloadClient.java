@@ -5,6 +5,7 @@ import com.epam.gym_crm.workload.contract.TrainerWorkloadRequest;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -28,11 +29,15 @@ public class WorkloadClient {
     @CircuitBreaker(name = "workloadService", fallbackMethod = "fallback")
     public void send(TrainerWorkloadRequest req) {
         String token = integrationJwtService.generateToken("gym-crm");
-        log.info("INTEGRATION JWT: {}", token);
+        log.info("INTEGRATION JWT: {}", token);//for demonstration!
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(token);
+        String txId = MDC.get("transactionId");
+        if (txId != null && !txId.isBlank()) {
+            headers.set("X-Transaction-Id", txId);
+        }
 
         HttpEntity<TrainerWorkloadRequest> entity = new HttpEntity<>(req, headers);
 
