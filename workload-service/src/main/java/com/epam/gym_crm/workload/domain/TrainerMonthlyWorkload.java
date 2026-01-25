@@ -9,8 +9,10 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "trainer_monthly_workload",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"trainer_username", "year", "month"}))
+@Table(
+        name = "trainer_monthly_workload",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"trainer_username", "year_value", "month_value"})
+)
 public class TrainerMonthlyWorkload {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,28 +39,66 @@ public class TrainerMonthlyWorkload {
     @Column(name = "total_minutes", nullable = false)
     private int totalMinutes;
 
-    public TrainerMonthlyWorkload() {}
+    public TrainerMonthlyWorkload() {
+    }
 
-    public Long getId() { return id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getTrainerUsername() { return trainerUsername; }
-    public void setTrainerUsername(String trainerUsername) { this.trainerUsername = trainerUsername; }
+    public String getTrainerUsername() {
+        return trainerUsername;
+    }
 
-    public String getTrainerFirstName() { return trainerFirstName; }
-    public void setTrainerFirstName(String trainerFirstName) { this.trainerFirstName = trainerFirstName; }
+    public void setTrainerUsername(String trainerUsername) {
+        this.trainerUsername = trainerUsername;
+    }
 
-    public String getTrainerLastName() { return trainerLastName; }
-    public void setTrainerLastName(String trainerLastName) { this.trainerLastName = trainerLastName; }
+    public String getTrainerFirstName() {
+        return trainerFirstName;
+    }
 
-    public boolean isActive() { return active; }
-    public void setActive(boolean active) { this.active = active; }
+    public void setTrainerFirstName(String trainerFirstName) {
+        this.trainerFirstName = trainerFirstName;
+    }
 
-    public int getYear() { return year; }
-    public void setYear(int year) { this.year = year; }
+    public String getTrainerLastName() {
+        return trainerLastName;
+    }
 
-    public int getMonth() { return month; }
-    public void setMonth(int month) { this.month = month; }
+    public void setTrainerLastName(String trainerLastName) {
+        this.trainerLastName = trainerLastName;
+    }
 
-    public int getTotalMinutes() { return totalMinutes; }
-    public void setTotalMinutes(int totalMinutes) { this.totalMinutes = totalMinutes; }
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public int getMonth() {
+        return month;
+    }
+
+    public void setMonth(int month) {
+        this.month = month;
+    }
+
+    public int getTotalMinutes() {
+        return totalMinutes;
+    }
+
+    public void setTotalMinutes(int totalMinutes) {
+        this.totalMinutes = totalMinutes;
+    }
 }

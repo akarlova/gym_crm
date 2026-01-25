@@ -1,24 +1,42 @@
 package com.epam.gym_crm.integration;
 
+import com.epam.gym_crm.integration.security.IntegrationJwtService;
 import com.epam.gym_crm.workload.contract.TrainerWorkloadRequest;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 @Component
 public class WorkloadClient {
-    private final RestTemplate restTemplate;
     private static final Logger log = LoggerFactory.getLogger(WorkloadClient.class);
 
-    public WorkloadClient(RestTemplate restTemplate) {
+    private static final String URL = "http://workload-service/workload";
+
+    private final RestTemplate restTemplate;
+    private final IntegrationJwtService integrationJwtService;
+
+    public WorkloadClient(RestTemplate restTemplate, IntegrationJwtService integrationJwtService) {
         this.restTemplate = restTemplate;
+        this.integrationJwtService = integrationJwtService;
     }
 
     @CircuitBreaker(name = "workloadService", fallbackMethod = "fallback")
     public void send(TrainerWorkloadRequest req) {
-        restTemplate.postForEntity("http://workload-service/workload", req, Void.class);
+        String token = integrationJwtService.generateToken("gym-crm");
+        log.info("INTEGRATION JWT: {}", token);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(token);
+
+        HttpEntity<TrainerWorkloadRequest> entity = new HttpEntity<>(req, headers);
+
+        restTemplate.postForEntity(URL, entity, Void.class);
     }
 
     private void fallback(TrainerWorkloadRequest req, Throwable ex) {

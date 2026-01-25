@@ -3,16 +3,16 @@ package com.epam.gym_crm.workload.service;
 import com.epam.gym_crm.workload.contract.ActionType;
 import com.epam.gym_crm.workload.contract.TrainerWorkloadRequest;
 import com.epam.gym_crm.workload.domain.TrainerMonthlyWorkload;
-import com.epam.gym_crm.workload.dto.MonthlyWorkloadResponse;
-import com.epam.gym_crm.workload.repo.TrainerMonthlyWorkloadRepository;
+import com.epam.gym_crm.workload.web.dto.MonthlyWorkloadResponse;
+import com.epam.gym_crm.workload.repo.ITrainerMonthlyWorkloadRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class WorkloadService {
-    private final TrainerMonthlyWorkloadRepository repo;
+    private final ITrainerMonthlyWorkloadRepository repo;
 
-    public WorkloadService(TrainerMonthlyWorkloadRepository repo) {
+    public WorkloadService(ITrainerMonthlyWorkloadRepository repo) {
         this.repo = repo;
     }
 
@@ -35,7 +35,6 @@ public class WorkloadService {
                     return nw;
                 });
 
-        // обновим ФИО/active (вдруг поменялось)
         row.setTrainerFirstName(req.getTrainerFirstName());
         row.setTrainerLastName(req.getTrainerLastName());
         row.setActive(req.isActive());

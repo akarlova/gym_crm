@@ -1,7 +1,7 @@
-package com.epam.gym_crm.workload.controller;
+package com.epam.gym_crm.workload.web.controller;
 
 import com.epam.gym_crm.workload.contract.TrainerWorkloadRequest;
-import com.epam.gym_crm.workload.dto.MonthlyWorkloadResponse;
+import com.epam.gym_crm.workload.web.dto.MonthlyWorkloadResponse;
 import com.epam.gym_crm.workload.service.WorkloadService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

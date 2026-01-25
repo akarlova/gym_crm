@@ -1,4 +1,4 @@
-package com.epam.gym_crm.workload.dto;
+package com.epam.gym_crm.workload.web.dto;
 
 public class MonthlyWorkloadResponse {
     private String trainerUsername;
