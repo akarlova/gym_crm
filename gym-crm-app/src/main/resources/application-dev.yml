@@ -1,0 +1,69 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/gym_crm_dev
+    username: gym_user
+    password: 12345
+    driver-class-name: org.postgresql.Driver
+
+  application:
+    name: gym-crm
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  liquibase:
+    contexts: schema,seed
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: 8081
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - metrics
+          - prometheus
+          - env
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+jwt:
+  secret: "u2VjdXJlU3VwZXJMb25nU3VwZXJTZWNyZXRTdHJpbmcyNTY="
+  expiration-minutes: 60
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+resilience4j:
+  circuitbreaker:
+    instances:
+      workloadService:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 2
+
+integration:
+  jwt:
+    secret: "u2VjdXJlU3VwZXJMb25nU3VwZXJTZWNyZXRTdHJpbmcyNTY="
+    expiration-minutes: 120
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %-5level [%X{tx}] %logger{36} - %msg%n"
+
+
+
+
+
